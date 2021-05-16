@@ -5,12 +5,17 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
+# Edit these variables as per your need
+
 FROM_USER = '<from email id>'
 PASSWORD = '<password of from email id>'
 TO_USER = '<to email id>'
 MIN_AGE=55
 
+#Constants
+
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
+CURDATE=datetime.datetime.today().strftime("%d-%m-%Y")
 
 def mailto(email_content):
     from_user = FROM_USER
@@ -61,46 +66,41 @@ def fetchStateAndDistrictDetail():
 
     
 def fetchVaccineSlots(districtId,districtName):
-    
-    base = datetime.datetime.today()
-    date_list = [base + datetime.timedelta(days=x) for x in range(1)]
-    date_str = [x.strftime("%d-%m-%Y") for x in date_list]
 
-    for INP_DATE in date_str:
-        URL = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id={}&date={}".format(districtId, INP_DATE)
-        response = requests.get(URL,headers=HEADERS)
-        if response.ok:
-            resp_json = response.json()
-            data="""<html>
-            <head>
-            <style>
-            </style>
-            </head>
-            <body>
-            <p>Hi!</p>
-            <p>Here is your requested vaccine slot avilability detail:</p>	
-            <pre>"""
-    
-            str=""
-            if resp_json["centers"]:
-                for center in resp_json["centers"]:
-                    for session in center["sessions"]:
-                        if session["min_age_limit"] <= MIN_AGE and session["available_capacity"]>0 :
-                            str+="\t"+center["name"]
-                            str+="\n\t"+center["address"]+"\n\t"+session["date"]+"\t Price: "+center["fee_type"]+"\n"
-                            str+="\t Available Capacity: {}".format(session["available_capacity"])+"\n"
-                            str+="\t Min Age Limit: {}".format(session["min_age_limit"])+"\n"
-                            if(session["vaccine"] != ''):
-                                str+="\t Vaccine: "+session["vaccine"]+"\n\n"
-                            print(str)
-            if(str==""):
-                print("No slots Avilable on :{}".format(INP_DATE))
-                data+="<h4> Available vaccine slots in "+districtName+" as of "+INP_DATE+"</h4>"
-                str+="Sorry no available slot for your district on given date..!!"
-                mailto(data+str+"</pre><p>Stay home, Stay Safe..!!</p><p>VacBot</p></body></html>")
-            else:
-                data+="<h4> Available vaccine slots in "+districtName+" as of "+INP_DATE+"</h4>"
-                mailto(data+str+"</pre><p>Stay home, Stay Safe..!!</p><p>VacBot</p></body></html>")
+    URL = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id={}&date={}".format(districtId, CURDATE)
+    response = requests.get(URL,headers=HEADERS)
+    if response.ok:
+        resp_json = response.json()
+        data="""<html>
+        <head>
+        <style>
+        </style>
+        </head>
+        <body>
+        <p>Hi!</p>
+        <p>Here is your requested vaccine slot avilability detail:</p>	
+        <pre>"""
+
+        str=""
+        if resp_json["centers"]:
+            for center in resp_json["centers"]:
+                for session in center["sessions"]:
+                    if session["min_age_limit"] <= MIN_AGE and session["available_capacity"]>0 :
+                        str+="\t"+center["name"]
+                        str+="\n\t"+center["address"]+"\n\t"+session["date"]+"\t Price: "+center["fee_type"]+"\n"
+                        str+="\t Available Capacity: {}".format(session["available_capacity"])+"\n"
+                        str+="\t Min Age Limit: {}".format(session["min_age_limit"])+"\n"
+                        if(session["vaccine"] != ''):
+                            str+="\t Vaccine: "+session["vaccine"]+"\n\n"
+                        print(str)
+        if(str==""):
+            print("No slots Avilable on :{}".format(CURDATE))
+            data+="<h4> Available vaccine slots in "+districtName+" as of "+CURDATE+"</h4>"
+            str+="Sorry no available slot for your district on given date..!!"
+            mailto(data+str+"</pre><p>Stay home, Stay Safe..!!</p><p>VacBot</p></body></html>")
+        else:
+            data+="<h4> Available vaccine slots in "+districtName+" as of "+CURDATE+"</h4>"
+            mailto(data+str+"</pre><p>Stay home, Stay Safe..!!</p><p>VacBot</p></body></html>")
             
 if __name__ == "__main__":
     fetchStateAndDistrictDetail()
