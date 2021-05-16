@@ -9,6 +9,7 @@ HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36
 FROM_USER = '<from email id>'
 PASSWORD = '<password of from email id>'
 TO_USER = '<to email id>'
+MIN_AGE=55
 
 
 def mailto(email_content):
@@ -84,7 +85,7 @@ def fetchVaccineSlots(districtId,districtName):
             if resp_json["centers"]:
                 for center in resp_json["centers"]:
                     for session in center["sessions"]:
-                        if session["min_age_limit"] <= 55 and session["available_capacity"]>0 :
+                        if session["min_age_limit"] <= MIN_AGE and session["available_capacity"]>0 :
                             str+="\t"+center["name"]
                             str+="\n\t"+center["address"]+"\n\t"+session["date"]+"\t Price: "+center["fee_type"]+"\n"
                             str+="\t Available Capacity: {}".format(session["available_capacity"])+"\n"
