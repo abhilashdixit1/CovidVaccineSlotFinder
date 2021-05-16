@@ -2,6 +2,9 @@
 
 These scripts help you find a vaccine slot in a desired districts for a given age range.
 
+# Prerequisite
+You need to have python 3 installed in your system and you are good to go.
+
 
 # cowinAuto.py
 
